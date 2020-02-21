@@ -1,5 +1,23 @@
 # About
 
+## Docker build
+
+```bash
+sudo -E docker build \
+    --build-arg PKG_NAME=zlib/v1.2.11 \
+    --build-arg PKG_CHANNEL=conan/stable \
+    --build-arg PKG_UPLOAD_NAME=zlib/v1.2.11@conan/stable \
+    --build-arg CONAN_EXTRA_REPOS="conan-local http://10.108.8.182:8081/artifactory/api/conan/conan False" \
+    --build-arg CONAN_EXTRA_REPOS_USER="user -p password1 -r conan-local admin" \
+    --build-arg CONAN_INSTALL="conan install --profile gcc --build missing" \
+    --build-arg CONAN_CREATE="conan create --profile gcc --build missing" \
+    --build-arg CONAN_UPLOAD="conan upload --all -r=conan-local -c --retry 3 --retry-wait 10 --force" \
+    --build-arg BUILD_TYPE=Debug \
+    -f conan_zlib.Dockerfile --tag conan_zlib . --no-cache
+```
+
+## Local build
+
 ```bash
 export PKG_NAME=zlib/v1.2.11@conan/stable
 conan remove $PKG_NAME

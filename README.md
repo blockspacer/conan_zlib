@@ -20,6 +20,9 @@ sudo -E docker build \
 ## Local build
 
 ```bash
+sudo -E apt-get install -y software-properties-common \
+       autoconf automake libtool make patch build-essential
+
 export PKG_NAME=zlib/v1.2.11@conan/stable
 conan remove $PKG_NAME
 conan create . conan/stable -s build_type=Debug --profile gcc --build missing

@@ -13,7 +13,7 @@ class ZlibConan(ConanFile):
     license = "Zlib"
     description = ("A Massively Spiffy Yet Delicately Unobtrusive Compression Library "
                    "(Also Free, Not to Mention Unencumbered by Patents)")
-    settings = "os_build", "os", "arch", "compiler", "build_type"
+    settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "minizip": [True, False]}
     default_options = "shared=False", "fPIC=True", "minizip=False"
     exports_sources = ["CMakeLists.txt", "CMakeLists_minizip.txt", "minizip.patch"]

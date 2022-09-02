@@ -46,9 +46,10 @@ class ZlibConan(ConanFile):
         tools.patch(patch_file="minizip.patch", base_path=self._source_subfolder)
 
     def build(self):
-        self._build_zlib()
-        if self.options.minizip:
-            self._build_minizip()
+        with tools.vcvars(self.settings, only_diff=False): # https://github.com/conan-io/conan/issues/6577
+            self._build_zlib()
+            if self.options.minizip:
+                self._build_minizip()
 
     @property
     def _use_autotools(self):
@@ -134,32 +135,33 @@ class ZlibConan(ConanFile):
                     os.rename(current_lib, os.path.join(lib_path, "libzlib.a"))
 
     def package(self):
-        # Extract the License/s from the header to a file
-        with tools.chdir(os.path.join(self.source_folder, self._source_subfolder)):
-            tmp = tools.load("zlib.h")
-            license_contents = tmp[2:tmp.find("*/", 1)]
-            tools.save("LICENSE", license_contents)
+        with tools.vcvars(self.settings, only_diff=False): # https://github.com/conan-io/conan/issues/6577
+            # Extract the License/s from the header to a file
+            with tools.chdir(os.path.join(self.source_folder, self._source_subfolder)):
+                tmp = tools.load("zlib.h")
+                license_contents = tmp[2:tmp.find("*/", 1)]
+                tools.save("LICENSE", license_contents)
 
-        # Copy the license files
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+            # Copy the license files
+            self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
-        # Copy headers
-        for header in ["*zlib.h", "*zconf.h"]:
-            self.copy(pattern=header, dst="include", src=self._source_subfolder, keep_path=False)
-            self.copy(pattern=header, dst="include", src="_build", keep_path=False)
+            # Copy headers
+            for header in ["*zlib.h", "*zconf.h"]:
+                self.copy(pattern=header, dst="include", src=self._source_subfolder, keep_path=False)
+                self.copy(pattern=header, dst="include", src="_build", keep_path=False)
 
-        # Copying static and dynamic libs
-        build_dir = os.path.join(self._source_subfolder, "_build")
-        if self.options.shared:
-            self.copy(pattern="*.dylib*", dst="lib", src=build_dir, keep_path=False, symlinks=True)
-            self.copy(pattern="*.so*", dst="lib", src=build_dir, keep_path=False, symlinks=True)
-            self.copy(pattern="*.dll", dst="bin", src=build_dir, keep_path=False)
-            self.copy(pattern="*.dll.a", dst="lib", src=build_dir, keep_path=False)
-        else:
-            self.copy(pattern="*.a", dst="lib", src=build_dir, keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", src=build_dir, keep_path=False)
+            # Copying static and dynamic libs
+            build_dir = os.path.join(self._source_subfolder, "_build")
+            if self.options.shared:
+                self.copy(pattern="*.dylib*", dst="lib", src=build_dir, keep_path=False, symlinks=True)
+                self.copy(pattern="*.so*", dst="lib", src=build_dir, keep_path=False, symlinks=True)
+                self.copy(pattern="*.dll", dst="bin", src=build_dir, keep_path=False)
+                self.copy(pattern="*.dll.a", dst="lib", src=build_dir, keep_path=False)
+            else:
+                self.copy(pattern="*.a", dst="lib", src=build_dir, keep_path=False)
+            self.copy(pattern="*.lib", dst="lib", src=build_dir, keep_path=False)
 
-        self._rename_libraries()
+            self._rename_libraries()
 
     def package_info(self):
         if self.options.minizip:
